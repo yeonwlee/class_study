@@ -5,7 +5,8 @@ from pydantic import BaseModel
 from langchain.chat_models import ChatOpenAI
 # from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
-from langchain.chains import LLMChain
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferMemory
 from dotenv import load_dotenv
 import os
 
@@ -22,14 +23,19 @@ chat_model = ChatOpenAI(model_name='gpt-4o-mini', temperature=0.1)
 chat_prompt = ChatPromptTemplate.from_messages(
     [
         SystemMessagePromptTemplate.from_template('너는 5살짜리 여자 아이야. 한국에 살고 있고, 활발한 성격이야. 5살 짜리 동갑내기가 알아들을 수 있게 답변 해줘'),
-        HumanMessagePromptTemplate.from_template('{chat}')
+        HumanMessagePromptTemplate.from_template('{history}'),
+        HumanMessagePromptTemplate.from_template('{input}')
     ]
 )
 
+# 버퍼
+memory = ConversationBufferMemory()
+
 # 3. 챗모델+프롬프트 연결 체인 만들기
-chat_chain = LLMChain(
-    llm = chat_model,
-    prompt = chat_prompt,
+chat_chain = ConversationChain(
+    llm=chat_model,
+    prompt=chat_prompt,
+    memory=memory
 )
 
 #######################################
@@ -40,37 +46,36 @@ class Chat(BaseModel):
     
     
 @app.post('/chatbot')
-def chatbot(talk:str=Form(...)):
+async def chatbot(talk:str=Form(...)):
     '''
     이런 식으로 주석을 주면 redoc에서 이 내용이 보입니다.\n
     이렇게 대충 달지 맙시다\n
     챗봇과의 대화
     '''
-
-    result = chat_chain.predict(chat=talk)
+    result = chat_chain.run(input=talk)
     return {'result': result}
 
 
 @app.get('/readitem/{id}')# 이런 식으로 하면 뒤에 오는 값을 받을 수 있음
-def readitem(id:str):
+async def readitem(id:str):
     return id
 
 
 @app.post('/login')
-def login(id:str=Form(...), pw:str=Form(...)):
+async def login(id:str=Form(...), pw:str=Form(...)):
     return {'id':id, 'pw':pw}
 
 
 @app.get('/upload')
-def upload():
+async def upload():
     '''
     이미지를 서버에 업로드함
     '''
-    return {'result': '업로드 성공'}
+    return {'result': '업로드 성공'}  
 
 
 @app.get('/aiimage')
-def aiimage():
+async def aiimage():
     '''
     이미지를 받아서 해당 이미지를 통해 연예인을 분류함
     '''
@@ -78,7 +83,7 @@ def aiimage():
 
 
 @app.post('/jsontest')
-def jsontest(chatbot:Chat): # 위의 클래스 참고. 이렇게 해주면 데이터 타입이 맞는지 아닌지도 자동 체크해줍니다. ex. type 에 숫자 넣어보내면 오류남
+async def jsontest(chatbot:Chat): # 위의 클래스 참고. 이렇게 해주면 데이터 타입이 맞는지 아닌지도 자동 체크해줍니다. ex. type 에 숫자 넣어보내면 오류남
     return {'type': chatbot.type, 'talk': chatbot.talk}
 
 
