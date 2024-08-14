@@ -61,7 +61,7 @@ class CustomChatBot():
             self.chat_chain = self.chat_prompt | self.model
      
     
-    def _get_session_history(self, session_id: str) -> BaseChatMessageHistory:
+    def _get_session_history(self, session_id: str) -> ChatMessageHistory:
         if session_id not in HISTORY_STORAGE:
             HISTORY_STORAGE[session_id] = {}
         if self.model_name not in HISTORY_STORAGE[session_id]:
