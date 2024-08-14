@@ -69,13 +69,13 @@ class CustomChatBot():
         return HISTORY_STORAGE[session_id][self.model_name]
     
 
-    def _get_available_params(self) -> dict:
+    def _get_available_params(self) -> tuple:
         if isinstance(self.chat_chain, RunnableWithMessageHistory):
             return {'question': ''}, {'configurable': {"session_id": ''}}
         return {'question': ''}, None
     
     
-    def exec(self, chat:str, user_id:str) -> dict:
+    def exec(self, chat:str, user_id:str) -> str:
         param, config = self._get_available_params()
         param['question'] = chat
         if config is not None:
