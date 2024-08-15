@@ -39,6 +39,6 @@ async def chatbot_cook(response: Response, chat:str=Form(...), user_id:UserLogin
 
 
 @ai_chat_router.post('/chatbot/history-of-chat')
-async def get_chatbot_data(response: Response, chat:str=Form(...), user_id:UserLoginData=Depends(check_auth), db: Session = Depends(get_db_session)) -> list[dict]:
+async def get_chatbot_data(response: Response, user_id:UserLoginData=Depends(check_auth), db: Session = Depends(get_db_session)) -> list[dict]:
     history = get_chat_history(db=db, session_id=user_id)
     return [h.as_dict() for h in history]
