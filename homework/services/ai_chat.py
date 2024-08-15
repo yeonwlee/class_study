@@ -4,8 +4,11 @@ from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, Sy
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.runnables.history import RunnableWithMessageHistory
-from services.user import INMEMORY_USER_DB
+from services.database import save_message_to_db, get_chat_history
 from schemas.user import UserLoginData
+from dependencies import database
+from sqlalchemy.orm import Session
+
 
 
 HISTORY_STORAGE= {}
@@ -75,10 +78,22 @@ class CustomChatBot():
         return {'question': ''}, None
     
     
-    def exec(self, chat:str, user_id:str) -> str:
+    def exec(self, chat:str, user_id:str, db:Session) -> str:
+        session_id = user_id  # 단순화된 세션 ID 사용 (여기서는 user_id를 사용)
+        
+        # 사용자의 입력 저장
+        save_message_to_db(db=db, session_id=session_id, user_id=user_id, model_name=self.model_name, role="user", message=chat)
+
         param, config = self._get_available_params()
         param['question'] = chat
         if config is not None:
-            config['configurable']['session_id'] = user_id
-            return self.chat_chain.invoke(param, config=config).content
-        return self.chat_chain.invoke(param).content
+            config['configurable']['session_id'] = session_id
+            response = self.chat_chain.invoke(param, config=config).content
+        else:
+            response = self.chat_chain.invoke(param).content
+            
+        # AI의 응답 저장
+        save_message_to_db(db=db, session_id=session_id, user_id=user_id, model_name=self.model_name, role="ai", message=response)
+
+        return response
+    

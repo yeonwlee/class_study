@@ -2,8 +2,15 @@ from fastapi import APIRouter, status, Form, Response, Depends
 from fastapi.responses import JSONResponse
 from services.ai_chat import CustomChatBot
 from schemas.user import UserLoginData
+from schemas.ai_chat import ChatHistory
 from dependencies.auth import check_auth
+from dependencies.database import get_db_session
+from services.database import get_chat_history
 from starlette.responses import RedirectResponse
+from sqlalchemy.orm import Session
+from dependencies import database
+from fastapi import Depends
+
 
 
 ai_chat_router = APIRouter()
@@ -17,15 +24,21 @@ cook_chatbot = CustomChatBot(kind_of_model='llama3.1', model_name='cook', prompt
 # {chat:안녕~}
 # 챗봇은 관광명소를 추천해주도록 역할을 한정해야 함. 관광명소 추천과 관련없는 질문은 차단.
 @ai_chat_router.post('/chatbot')
-async def chatbot(response: Response, chat:str=Form(...), user_id:UserLoginData=Depends(check_auth)) -> str:
-    return tour_chatbot.exec(chat=chat, user_id=user_id)
+async def chatbot(response: Response, chat:str=Form(...), user_id:UserLoginData=Depends(check_auth), db: Session = Depends(get_db_session)) -> str:
+    return tour_chatbot.exec(chat=chat, user_id=user_id, db=db)
 
 
 @ai_chat_router.post('/chatbot/korean-history')
-async def chatbot_korean_history(response: Response, chat:str=Form(...), user_id:UserLoginData=Depends(check_auth)) -> str:
-    return korean_history_chatbot.exec(chat=chat, user_id=user_id)
+async def chatbot_korean_history(response: Response, chat:str=Form(...), user_id:UserLoginData=Depends(check_auth), db: Session = Depends(get_db_session)) -> str:
+    return korean_history_chatbot.exec(chat=chat, user_id=user_id, db=db)
 
 
 @ai_chat_router.post('/chatbot/cook')
-async def chatbot_cook(response: Response, chat:str=Form(...), user_id:UserLoginData=Depends(check_auth)) -> str:
-    return cook_chatbot.exec(chat=chat, user_id=user_id)
+async def chatbot_cook(response: Response, chat:str=Form(...), user_id:UserLoginData=Depends(check_auth), db: Session = Depends(get_db_session)) -> str:
+    return cook_chatbot.exec(chat=chat, user_id=user_id, db=db)
+
+
+@ai_chat_router.post('/chatbot/history-of-chat')
+async def get_chatbot_data(response: Response, chat:str=Form(...), user_id:UserLoginData=Depends(check_auth), db: Session = Depends(get_db_session)) -> list[dict]:
+    history = get_chat_history(db=db, session_id=user_id)
+    return [h.as_dict() for h in history]

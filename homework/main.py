@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from routers import greeting, user, ai_chat, ai_classification
 import uvicorn
 import ssl
+import os
+from dependencies import database
+
 
 app = FastAPI()
 app.include_router(greeting.greeting_router)
