@@ -13,7 +13,7 @@ async def login(response: Response, id:str=Form(...), pw:str=Form(...)) -> str:
     if (user:=is_valid_userinfo(id, pw)):
         generate_token(user) # 토큰 생성
         response.status_code = status.HTTP_200_OK
-        return f'로그인 성공: {user.token.access_token}'
+        return f'로그인 성공'
     else:   
         response.status_code = status.HTTP_401_UNAUTHORIZED
         return '로그인 실패'
