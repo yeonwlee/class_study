@@ -71,11 +71,6 @@ class ImageClassificationModel():
             raise HTTPException(status_code=400, detail=f'파일의 크기는 {max_size / (1024 * 1024):.2f}MB 보다 작아야 합니다')
     
     
-    def _sanitize_filename(self, image_name: str) -> str:
-        # 파일 이름에서 허용되지 않는 문자를 필터링
-        return re.sub(r'[^a-zA-Z0-9_.-]', '_', image_name)
-    
-    
     def _generate_unique_filename(self, image_name: str) -> str:
         # 현재 타임스탬프를 기반으로 고유한 파일 이름 생성
         ext = os.path.splitext(image_name)[1]
@@ -88,7 +83,7 @@ class ImageClassificationModel():
         self._validate_image_type(image)
         self._validate_file_size(image)
         os.makedirs(self.image_file_path, mode=0o777, exist_ok=True)
-        unique_filename = self._generate_unique_filename(self._sanitize_filename(image.filename))
+        unique_filename = self._generate_unique_filename(image)
         file_path = os.path.join(self.image_file_path, unique_filename)
         try:
             image.file.seek(0)  # 파일 포인터를 원래 위치로 초기화
@@ -102,7 +97,7 @@ class ImageClassificationModel():
         
     def _preprocess_image(self, image: UploadFile) -> Image:
         image = Image.open(image.file)
-        if image.mode == 'L' or image.mode == 'RGBA':
+        if image.mode != 'RGB':
             image = image.convert('RGB')
         image = self.transform_test(image).unsqueeze(0).to(self.device) # 배치 단위로 실행하기 위해 차원을 하나 늘려줌
         return image
