@@ -37,7 +37,7 @@ class CustomChatBot():
             self.chat_prompt = ChatPromptTemplate.from_messages(
                 [
                     SystemMessagePromptTemplate.from_template(f'당신은 {prompt_concept} 에 대한 전문가입니다. \
-                                                                {prompt_concept}에 대해서만 답변합니다. 다만, 이전의 질문에 대해서 재질문하면 답변합니다.'),
+                                                                {prompt_concept}에 대해서만 답변합니다. 다만, 이전의 질문이 무엇이었는지에 대해서 질문하면 답변합니다.'),
                     HumanMessagePromptTemplate.from_template('{question}'),
                     MessagesPlaceholder(variable_name='history')
                 ]

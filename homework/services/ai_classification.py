@@ -71,20 +71,20 @@ class ImageClassificationModel():
             raise HTTPException(status_code=400, detail=f'파일의 크기는 {max_size / (1024 * 1024):.2f}MB 보다 작아야 합니다')
     
     
-    def _generate_unique_filename(self, image_name: str) -> str:
-        # 현재 타임스탬프를 기반으로 고유한 파일 이름 생성
-        ext = os.path.splitext(image_name)[1]
-        timestamp = int(time.time())
-        unique_filename = f"{timestamp}{ext}"
-        return unique_filename
+    # def _generate_unique_filename(self, image_name: str) -> str:
+    #     # 현재 타임스탬프를 기반으로 고유한 파일 이름 생성
+    #     ext = os.path.splitext(image_name)[1]
+    #     timestamp = int(time.time())
+    #     unique_filename = f"{timestamp}{ext}"
+    #     return unique_filename
     
     
     async def upload(self, image: UploadFile) -> None:
         self._validate_image_type(image)
         self._validate_file_size(image)
         os.makedirs(self.image_file_path, mode=0o777, exist_ok=True)
-        unique_filename = self._generate_unique_filename(image)
-        file_path = os.path.join(self.image_file_path, unique_filename)
+        # unique_filename = self._generate_unique_filename(image.filename)
+        file_path = os.path.join(self.image_file_path, image.filename)
         try:
             image.file.seek(0)  # 파일 포인터를 원래 위치로 초기화
             async with aiofiles.open(file_path, 'wb') as buffer:

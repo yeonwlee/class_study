@@ -8,9 +8,9 @@ from dependencies import database
 
 app = FastAPI()
 app.include_router(greeting.greeting_router)
-app.include_router(user.user_router)
-app.include_router(ai_chat.ai_chat_router)
-app.include_router(ai_classification.ai_classification_router)
+app.include_router(user.user_router, prefix='/login')
+app.include_router(ai_chat.ai_chat_router, prefix='/chatbot')
+app.include_router(ai_classification.ai_classification_router, prefix='/similar')
 
 # 인증서 관련 오류 방지
 ssl._create_default_https_context = ssl._create_unverified_context

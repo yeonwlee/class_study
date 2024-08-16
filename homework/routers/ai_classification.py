@@ -15,7 +15,7 @@ celebrity_classification_model = CelebrityImageClassificationModel('resnet34')
 # {imgFile: image.jpg}
 # 파일 형식은 jpg, jpeg, png를 받을 수 있도록 설정
 # 얼굴은 차은우, 카리나, 마동석, 김혜자
-@ai_classification_router.post('/similar')
+@ai_classification_router.post('')
 async def similar(response: Response, imgFile:UploadFile, user_id:UserLoginData=Depends(check_auth)) -> JSONResponse:
     await celebrity_classification_model.upload(imgFile)
     return await celebrity_classification_model.exec(imgFile)

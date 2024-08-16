@@ -8,7 +8,7 @@ user_router = APIRouter()
 # # {id:meta, pw:ai}
 # # 정확히 입력하면 "로그인 성공"을 return
 # # 틀리면 "로그인 실패"를 return
-@user_router.post('/login')
+@user_router.post('')
 async def login(response: Response, id:str=Form(...), pw:str=Form(...)) -> str:
     if (user:=is_valid_userinfo(id, pw)):
         generate_token(user) # 토큰 생성
