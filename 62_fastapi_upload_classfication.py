@@ -23,7 +23,7 @@ app = FastAPI()
 # .env 파일로 API키를 관리하도록 했어요
 load_dotenv()
 
-server_model_path = './models/cel_class_best_model.pth'
+server_model_path = './models/celebrity_classification/resnet34.pth'
 server_image_path = './image'
 os.makedirs(name=server_image_path, exist_ok=True)
 
@@ -33,7 +33,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 
 # 모델 불러오기 및 가중치 적용
 model = models.resnet34(pretrained=True)
-model.fc = nn.Linear(512, 3) # 3개만 분류할거라서 마지막 분류기 부분 수정
+model.fc = nn.Linear(512, 4) # 3개만 분류할거라서 마지막 분류기 부분 수정
 model_state_dict = torch.load(server_model_path, map_location='cpu')
 model.load_state_dict(model_state_dict)
 
